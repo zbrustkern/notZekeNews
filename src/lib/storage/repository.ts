@@ -40,6 +40,7 @@ export interface INewsRepository {
 
   logEvent(event: InteractionEvent): Promise<void>;
   getEvents(limit?: number): Promise<InteractionEvent[]>;
+  getEventsForReader(readerId: string, since?: string): Promise<InteractionEvent[]>;
 
   getLatestProfile(readerId: string): Promise<InterestProfile | null>;
   saveProfile(profile: InterestProfile): Promise<void>;

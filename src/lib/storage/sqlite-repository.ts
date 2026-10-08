@@ -22,7 +22,7 @@ import {
   interactionEventsTable,
   interestProfilesTable,
 } from "./schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gt, asc } from "drizzle-orm";
 
 export class SqliteNewsRepository implements INewsRepository {
   async getStories(limit = 50): Promise<Story[]> {
@@ -458,6 +458,34 @@ export class SqliteNewsRepository implements INewsRepository {
     }));
   }
 
+  async getEventsForReader(readerId: string, since?: string): Promise<InteractionEvent[]> {
+    const conditions = [eq(interactionEventsTable.readerId, readerId)];
+    if (since) {
+      conditions.push(gt(interactionEventsTable.createdAt, since));
+    }
+
+    const rows = db
+      .select()
+      .from(interactionEventsTable)
+      .where(and(...conditions))
+      .orderBy(asc(interactionEventsTable.createdAt))
+      .all();
+
+    return rows.map((r) => ({
+      id: r.id,
+      readerId: r.readerId,
+      sessionId: r.sessionId,
+      eventType: r.eventType as InteractionEvent["eventType"],
+      storyId: r.storyId || undefined,
+      articleId: r.articleId || undefined,
+      summaryRevisionId: r.summaryRevisionId || undefined,
+      dwellTimeMs: r.dwellTimeMs || undefined,
+      feedbackReason: r.feedbackReason || undefined,
+      metadata: JSON.parse(r.metadataJson || "{}"),
+      createdAt: r.createdAt,
+    }));
+  }
+
   async getLatestProfile(readerId: string): Promise<InterestProfile | null> {
     const row = db
       .select()
@@ -479,6 +507,7 @@ export class SqliteNewsRepository implements INewsRepository {
   }
 
   async saveProfile(profile: InterestProfile): Promise<void> {
+    const updatedAt = profile.updatedAt || new Date().toISOString();
     db.insert(interestProfilesTable)
       .values({
         version: profile.version,
@@ -487,14 +516,16 @@ export class SqliteNewsRepository implements INewsRepository {
         sourceAffinitiesJson: JSON.stringify(profile.sourceAffinities),
         explorationFactor: Math.round(profile.explorationFactor * 100),
         confidenceScore: profile.confidenceScore,
-        updatedAt: new Date().toISOString(),
+        updatedAt,
       })
       .onConflictDoUpdate({
         target: interestProfilesTable.version,
         set: {
           topicWeightsJson: JSON.stringify(profile.topicWeights),
           sourceAffinitiesJson: JSON.stringify(profile.sourceAffinities),
-          updatedAt: new Date().toISOString(),
+          explorationFactor: Math.round(profile.explorationFactor * 100),
+          confidenceScore: profile.confidenceScore,
+          updatedAt,
         },
       })
       .run();

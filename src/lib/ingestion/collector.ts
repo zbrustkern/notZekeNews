@@ -1,6 +1,8 @@
 import Parser from "rss-parser";
 import * as cheerio from "cheerio";
 import { repository } from "../storage/sqlite-repository";
+import { db } from "../storage/db";
+import { collectionRunsTable } from "../storage/schema";
 import { Article, Story, Source, TopicCategory } from "../domain/types";
 import { normalizeUrl, safeFetchText } from "./fetcher";
 import crypto from "crypto";
@@ -158,12 +160,35 @@ export async function pollSource(source: Source): Promise<IngestionResult> {
  * Runs collection across all enabled sources.
  */
 export async function runCollection(): Promise<IngestionResult[]> {
+  const startTime = new Date().toISOString();
   const sources = await repository.getSources(true);
   const results: IngestionResult[] = [];
 
   for (const src of sources) {
     const res = await pollSource(src);
     results.push(res);
+  }
+
+  // Record collection run
+  const totalArticles = results.reduce((sum, r) => sum + r.newArticles, 0);
+  const totalStories = results.reduce((sum, r) => sum + r.newStories, 0);
+  const allErrors = results.flatMap((r) => r.errors);
+
+  try {
+    db.insert(collectionRunsTable)
+      .values({
+        id: `run_${Date.now()}`,
+        startedAt: startTime,
+        completedAt: new Date().toISOString(),
+        sourcesPolled: sources.length,
+        articlesFound: totalArticles,
+        newStoriesCreated: totalStories,
+        summariesGenerated: 0,
+        errorsJson: JSON.stringify(allErrors),
+      })
+      .run();
+  } catch (err) {
+    console.error("Failed to record collection run:", err);
   }
 
   return results;
