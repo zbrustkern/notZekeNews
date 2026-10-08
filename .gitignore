@@ -10,3 +10,5 @@ coverage/
 # Local application data will be stored here during implementation.
 data/
 *.tsbuildinfo
+
+/.apphosting/

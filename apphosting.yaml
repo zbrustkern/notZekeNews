@@ -7,7 +7,7 @@ runConfig:
   cpu: 1
   memoryMiB: 1024
 env:
-  - variable: NODE_ENV
-    value: production
   - variable: GEMINI_API_KEY
     secret: gemini-api-key
+    availability:
+      - RUNTIME
