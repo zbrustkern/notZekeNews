@@ -1,0 +1,13 @@
+kind: AppHostingConfiguration
+schemaVersion: v1
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+env:
+  - variable: NODE_ENV
+    value: production
+  - variable: GEMINI_API_KEY
+    secret: gemini-api-key
