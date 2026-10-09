@@ -95,19 +95,7 @@ export async function pollSource(source: Source): Promise<IngestionResult> {
       if (existing) continue;
 
       const publishedAt = item.isoDate || item.pubDate;
-      let rawText = item.contentSnippet || item.content || "";
-
-      // Try fetching page content safely if RSS snippet is short
-      if (rawText.length < 200) {
-        try {
-          const html = await safeFetchText(canonicalUrl, 5000, 1024 * 1024);
-          const extracted = extractArticleContent(html, item.title || "");
-          rawText = extracted.content || rawText;
-        } catch (err: any) {
-          // Fall back gracefully to snippet
-          result.errors.push(`HTML fetch warning for ${canonicalUrl}: ${err.message}`);
-        }
-      }
+      const rawText = item.contentSnippet || item.content || (item as any)["content:encoded"] || item.title || "";
 
       const articleId = `art_${crypto.createHash("md5").update(canonicalUrl).digest("hex").slice(0, 12)}`;
       const newArticle: Article = {
@@ -164,12 +152,34 @@ export async function pollSource(source: Source): Promise<IngestionResult> {
 export async function runCollection(): Promise<IngestionResult[]> {
   const startTime = new Date().toISOString();
   const sources = await repository.getSources(true);
-  const results: IngestionResult[] = [];
+  const pollPromises = sources.map(async (src) => {
+    try {
+      return await pollSource(src);
+    } catch (err: any) {
+      return {
+        sourceId: src.id,
+        sourceName: src.name,
+        fetchedItems: 0,
+        newArticles: 0,
+        newStories: 0,
+        errors: [`Uncaught error polling ${src.name}: ${err.message}`],
+      };
+    }
+  });
 
-  for (const src of sources) {
-    const res = await pollSource(src);
-    results.push(res);
-  }
+  const settled = await Promise.allSettled(pollPromises);
+  const results: IngestionResult[] = settled.map((s, idx) =>
+    s.status === "fulfilled"
+      ? s.value
+      : {
+          sourceId: sources[idx].id,
+          sourceName: sources[idx].name,
+          fetchedItems: 0,
+          newArticles: 0,
+          newStories: 0,
+          errors: [`Failed: ${s.reason}`],
+        }
+  );
 
   // Record collection run
   const totalArticles = results.reduce((sum, r) => sum + r.newArticles, 0);

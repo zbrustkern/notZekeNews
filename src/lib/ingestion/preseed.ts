@@ -95,14 +95,18 @@ export async function preseedSources(pollImmediately = true): Promise<{
 
     await repository.saveSource(newSource);
     added.push(newSource);
+  }
 
-    if (pollImmediately) {
-      try {
-        await pollSource(newSource);
-      } catch (err) {
-        console.warn(`Initial poll warning for ${newSource.name}:`, err);
-      }
-    }
+  if (pollImmediately && added.length > 0) {
+    await Promise.allSettled(
+      added.map(async (src) => {
+        try {
+          await pollSource(src);
+        } catch (err) {
+          console.warn(`Initial poll warning for ${src.name}:`, err);
+        }
+      })
+    );
   }
 
   return { added, existing: existingSources };
