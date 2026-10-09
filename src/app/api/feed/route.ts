@@ -15,6 +15,7 @@ export async function GET() {
         return {
           ...story,
           rankingScore: breakdown.total,
+          rankingExplanation: breakdown.explanation,
           isBlocked: breakdown.isBlocked,
         };
       })

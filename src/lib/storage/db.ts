@@ -105,6 +105,8 @@ export function initializeDatabase() {
       block_topics_json TEXT NOT NULL DEFAULT '[]',
       preferred_sources_json TEXT NOT NULL DEFAULT '[]',
       blocked_sources_json TEXT NOT NULL DEFAULT '[]',
+      steered_topics_json TEXT NOT NULL DEFAULT '{}',
+      steered_sources_json TEXT NOT NULL DEFAULT '{}',
       pause_learning INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT NOT NULL
     );
@@ -144,6 +146,14 @@ export function initializeDatabase() {
       errors_json TEXT NOT NULL DEFAULT '[]'
     );
   `);
+
+  // Safe migration for newly added columns on existing databases
+  try {
+    sqlite.exec("ALTER TABLE preferences ADD COLUMN steered_topics_json TEXT NOT NULL DEFAULT '{}';");
+  } catch {}
+  try {
+    sqlite.exec("ALTER TABLE preferences ADD COLUMN steered_sources_json TEXT NOT NULL DEFAULT '{}';");
+  } catch {}
 }
 
 // Run table creation on import

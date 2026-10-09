@@ -23,7 +23,9 @@ export interface INewsRepository {
   getSummaryRevisionByStoryId(storyId: string): Promise<SummaryRevision | null>;
 
   getSources(onlyEnabled?: boolean): Promise<Source[]>;
+  getSourceById(id: string): Promise<Source | null>;
   saveSource(source: Source): Promise<void>;
+  deleteSource(id: string): Promise<void>;
   updateSourceStats(
     id: string,
     health: Source["healthStatus"],

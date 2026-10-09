@@ -74,6 +74,7 @@ export interface Story {
   isUserSubmitted?: boolean;
   userSubmissionNote?: string;
   rankingScore?: number;
+  rankingExplanation?: string;
   discoverySource?: string;
 }
 
@@ -102,6 +103,8 @@ export interface Submission {
   processedAt?: string;
 }
 
+export type SteeringTier = "over_index" | "neutral" | "under_index" | "banned";
+
 export interface Preference {
   id: string;
   readerId: string;
@@ -109,6 +112,8 @@ export interface Preference {
   blockTopics: string[];
   preferredSources: string[];
   blockedSources: string[];
+  steeredTopics?: Record<string, SteeringTier>;
+  steeredSources?: Record<string, SteeringTier>;
   pauseLearning: boolean;
   updatedAt: string;
 }

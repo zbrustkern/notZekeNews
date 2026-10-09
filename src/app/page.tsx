@@ -46,6 +46,19 @@ export default function FeedPage() {
     }
   };
 
+  const handleSteer = async (targetType: "topic" | "source", name: string, tier: any) => {
+    try {
+      await fetch("/api/steer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetType, name, tier }),
+      });
+      fetchFeed();
+    } catch (err) {
+      console.error("Failed to steer:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F5EF] text-[#182B33]">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -96,6 +109,7 @@ export default function FeedPage() {
                 story={story}
                 isFirst={index === 0}
                 onFeedback={handleFeedback}
+                onSteer={handleSteer}
               />
             ))}
           </div>

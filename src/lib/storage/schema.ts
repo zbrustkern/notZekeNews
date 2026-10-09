@@ -85,6 +85,8 @@ export const preferencesTable = sqliteTable("preferences", {
   blockTopicsJson: text("block_topics_json").notNull().default("[]"),
   preferredSourcesJson: text("preferred_sources_json").notNull().default("[]"),
   blockedSourcesJson: text("blocked_sources_json").notNull().default("[]"),
+  steeredTopicsJson: text("steered_topics_json").notNull().default("{}"),
+  steeredSourcesJson: text("steered_sources_json").notNull().default("{}"),
   pauseLearning: integer("pause_learning", { mode: "boolean" }).notNull().default(false),
   updatedAt: text("updated_at").notNull(),
 });

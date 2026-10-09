@@ -1,19 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronRight, ArrowUpRight } from "lucide-react";
-import { Story } from "@/lib/domain/types";
+import { ChevronRight, ArrowUpRight, Undo2 } from "lucide-react";
+import { Story, SteeringTier } from "@/lib/domain/types";
 import { SummaryInset } from "./SummaryInset";
+import { StoryMenu } from "./StoryMenu";
 
 interface StoryRowProps {
   story: Story;
   isFirst?: boolean;
   onFeedback: (storyId: string, feedbackType: string, reason?: string) => void;
+  onSteer?: (targetType: "topic" | "source", name: string, tier: SteeringTier) => void;
 }
 
-export function StoryRow({ story, isFirst, onFeedback }: StoryRowProps) {
-  // If first story, default to expanded as seen in mockup expanded-summary-v2
+export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps) {
   const [isExpanded, setIsExpanded] = useState(isFirst || false);
+  const [bannedState, setBannedState] = useState<{
+    targetType: "topic" | "source";
+    name: string;
+  } | null>(null);
 
   const toggleExpansion = () => {
     setIsExpanded((prev) => !prev);
@@ -25,6 +30,39 @@ export function StoryRow({ story, isFirst, onFeedback }: StoryRowProps) {
       toggleExpansion();
     }
   };
+
+  const handleSteer = (targetType: "topic" | "source", name: string, tier: SteeringTier) => {
+    if (tier === "banned") {
+      setBannedState({ targetType, name });
+    }
+    if (onSteer) {
+      onSteer(targetType, name, tier);
+    }
+  };
+
+  const handleUndoBan = () => {
+    if (bannedState && onSteer) {
+      onSteer(bannedState.targetType, bannedState.name, "neutral");
+      setBannedState(null);
+    }
+  };
+
+  if (bannedState) {
+    return (
+      <div className="py-4 px-3 my-2 bg-[#F5EBE6] border border-[#ECD1C6] rounded-md text-xs text-[#A65B32] flex items-center justify-between transition-all">
+        <span>
+          Muted {bannedState.targetType} <strong>{bannedState.name}</strong>. Future stories will be excluded.
+        </span>
+        <button
+          onClick={handleUndoBan}
+          className="inline-flex items-center text-[#21665D] font-semibold hover:underline ml-3"
+        >
+          <Undo2 className="w-3.5 h-3.5 mr-1" />
+          Undo
+        </button>
+      </div>
+    );
+  }
 
   return (
     <article
@@ -44,8 +82,8 @@ export function StoryRow({ story, isFirst, onFeedback }: StoryRowProps) {
         )}
       </div>
 
-      {/* Main Headline & Chevron Row */}
-      <div className="flex items-start justify-between gap-4">
+      {/* Main Headline & Controls Row */}
+      <div className="flex items-start justify-between gap-3">
         <button
           onClick={toggleExpansion}
           onKeyDown={handleKeyDown}
@@ -57,18 +95,22 @@ export function StoryRow({ story, isFirst, onFeedback }: StoryRowProps) {
           </h2>
         </button>
 
-        {/* Circular Chevron Disclosure Indicator */}
-        <button
-          onClick={toggleExpansion}
-          aria-label={isExpanded ? "Collapse summary" : "Expand summary"}
-          className="w-8 h-8 rounded-full border border-[#D5DDD3] hover:border-[#182B33] flex items-center justify-center flex-shrink-0 text-[#182B33] hover:bg-[#EDE8DC] transition-all focus:outline-none focus:ring-2 focus:ring-[#21665D]"
-        >
-          <ChevronRight
-            className={`w-4 h-4 transition-transform duration-200 ${
-              isExpanded ? "rotate-90" : "rotate-0"
-            }`}
-          />
-        </button>
+        {/* Action Controls: StoryMenu + Chevron */}
+        <div className="flex items-center space-x-1.5 flex-shrink-0 pt-0.5">
+          <StoryMenu story={story} onSteer={handleSteer} />
+
+          <button
+            onClick={toggleExpansion}
+            aria-label={isExpanded ? "Collapse summary" : "Expand summary"}
+            className="w-8 h-8 rounded-full border border-[#D5DDD3] hover:border-[#182B33] flex items-center justify-center text-[#182B33] hover:bg-[#EDE8DC] transition-all focus:outline-none focus:ring-2 focus:ring-[#21665D]"
+          >
+            <ChevronRight
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isExpanded ? "rotate-90" : "rotate-0"
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Metadata Line */}

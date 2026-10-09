@@ -292,6 +292,25 @@ export class SqliteNewsRepository implements INewsRepository {
     }));
   }
 
+  async getSourceById(id: string): Promise<Source | null> {
+    const r = db.select().from(sourcesTable).where(eq(sourcesTable.id, id)).get();
+    if (!r) return null;
+    return {
+      id: r.id,
+      name: r.name,
+      feedUrl: r.feedUrl,
+      siteUrl: r.siteUrl,
+      category: r.category as TopicCategory,
+      isEnabled: Boolean(r.isEnabled),
+      lastPolledAt: r.lastPolledAt || undefined,
+      lastHttpEtag: r.lastHttpEtag || undefined,
+      lastHttpModified: r.lastHttpModified || undefined,
+      healthStatus: r.healthStatus as Source["healthStatus"],
+      consecutiveFailures: r.consecutiveFailures,
+      articlesCount: r.articlesCount,
+    };
+  }
+
   async saveSource(source: Source): Promise<void> {
     db.insert(sourcesTable)
       .values({
@@ -316,6 +335,10 @@ export class SqliteNewsRepository implements INewsRepository {
         },
       })
       .run();
+  }
+
+  async deleteSource(id: string): Promise<void> {
+    db.delete(sourcesTable).where(eq(sourcesTable.id, id)).run();
   }
 
   async updateSourceStats(
@@ -386,6 +409,8 @@ export class SqliteNewsRepository implements INewsRepository {
       blockTopics: JSON.parse(row.blockTopicsJson || "[]"),
       preferredSources: JSON.parse(row.preferredSourcesJson || "[]"),
       blockedSources: JSON.parse(row.blockedSourcesJson || "[]"),
+      steeredTopics: JSON.parse(row.steeredTopicsJson || "{}"),
+      steeredSources: JSON.parse(row.steeredSourcesJson || "{}"),
       pauseLearning: Boolean(row.pauseLearning),
       updatedAt: row.updatedAt,
     };
@@ -400,6 +425,8 @@ export class SqliteNewsRepository implements INewsRepository {
         blockTopicsJson: JSON.stringify(pref.blockTopics || []),
         preferredSourcesJson: JSON.stringify(pref.preferredSources || []),
         blockedSourcesJson: JSON.stringify(pref.blockedSources || []),
+        steeredTopicsJson: JSON.stringify(pref.steeredTopics || {}),
+        steeredSourcesJson: JSON.stringify(pref.steeredSources || {}),
         pauseLearning: pref.pauseLearning,
         updatedAt: new Date().toISOString(),
       })
@@ -410,6 +437,8 @@ export class SqliteNewsRepository implements INewsRepository {
           blockTopicsJson: JSON.stringify(pref.blockTopics || []),
           preferredSourcesJson: JSON.stringify(pref.preferredSources || []),
           blockedSourcesJson: JSON.stringify(pref.blockedSources || []),
+          steeredTopicsJson: JSON.stringify(pref.steeredTopics || {}),
+          steeredSourcesJson: JSON.stringify(pref.steeredSources || {}),
           pauseLearning: pref.pauseLearning,
           updatedAt: new Date().toISOString(),
         },
