@@ -25,12 +25,17 @@ interface PreferencesModalProps {
 }
 
 const PRESET_SOURCES = [
+  { name: "Marginal Revolution", url: "https://marginalrevolution.com/feed", category: "SYSTEMS" as TopicCategory },
+  { name: "TechCrunch", url: "https://techcrunch.com/feed/", category: "ENGINEERING" as TopicCategory },
+  { name: "MIT Technology Review", url: "https://www.technologyreview.com/feed/", category: "SCIENCE" as TopicCategory },
+  { name: "Hacker News", url: "https://news.ycombinator.com/rss", category: "SYSTEMS" as TopicCategory },
+  { name: "Dan Luu", url: "https://danluu.com/atom.xml", category: "SYSTEMS" as TopicCategory },
+  { name: "Simon Willison", url: "https://simonwillison.net/atom/entries/", category: "ENGINEERING" as TopicCategory },
   { name: "Lobste.rs", url: "https://lobste.rs/rss", category: "SYSTEMS" as TopicCategory },
   { name: "LWN.net", url: "https://lwn.net/headlines/rss", category: "SYSTEMS" as TopicCategory },
   { name: "ACM TechNews", url: "https://technews.acm.org/rss", category: "ENGINEERING" as TopicCategory },
-  { name: "High Scalability", url: "http://feeds.feedburner.com/HighScalability", category: "SYSTEMS" as TopicCategory },
-  { name: "Nature News", url: "https://www.nature.com/nature.rss", category: "SCIENCE" as TopicCategory },
   { name: "Pragmatic Engineer", url: "https://newsletter.pragmaticengineer.com/feed", category: "ENGINEERING" as TopicCategory },
+  { name: "Nature News", url: "https://www.nature.com/nature.rss", category: "SCIENCE" as TopicCategory },
 ];
 
 export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModalProps) {

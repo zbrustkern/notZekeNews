@@ -445,6 +445,18 @@ describe("Milestone 2: Adaptive Profile Learning Engine & Telemetry Aggregator",
 
   describe("8. Operational Health Telemetry (src/lib/ops/health.ts)", () => {
     it("aggregates sources, articles, stories, profile version, and event telemetry", async () => {
+      await repository.saveSource({
+        id: "src_health_test",
+        name: "Health Test Source",
+        feedUrl: "https://example.com/health-rss",
+        siteUrl: "https://example.com",
+        category: "SYSTEMS",
+        isEnabled: true,
+        healthStatus: "healthy",
+        consecutiveFailures: 0,
+        articlesCount: 1,
+      });
+
       await repository.logEvent({
         id: `evt_health_1_${Date.now()}`,
         readerId: TEST_READER,

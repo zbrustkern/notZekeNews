@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { RotateCw } from "lucide-react";
 import { Header } from "@/components/Header";
 import { StoryRow } from "@/components/StoryRow";
 import { AddLinkModal } from "@/components/AddLinkModal";
@@ -11,6 +12,8 @@ import { formatTimeAgo } from "@/lib/format";
 export default function FeedPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshToast, setRefreshToast] = useState<string | null>(null);
   const [lastCollectedAt, setLastCollectedAt] = useState<string>("");
   const [isAddLinkOpen, setIsAddLinkOpen] = useState(false);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -28,6 +31,31 @@ export default function FeedPage() {
       console.error("Failed to load feed", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setRefreshToast(null);
+    try {
+      const res = await fetch("/api/feed/refresh", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        const summary =
+          data.newStoriesCreated > 0
+            ? `Refreshed · ${data.newStoriesCreated} new stories found`
+            : `Up to date · Checked ${data.sourcesPolled} feeds`;
+        setRefreshToast(summary);
+        setTimeout(() => setRefreshToast(null), 4000);
+        await fetchFeed();
+      }
+    } catch (err) {
+      console.error("Refresh failed:", err);
+      setRefreshToast("Refresh failed. Check network.");
+      setTimeout(() => setRefreshToast(null), 4000);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -81,18 +109,37 @@ export default function FeedPage() {
             <span suppressHydrationWarning>{todayLabel}</span>
           </div>
 
-          <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
             <h2 className="text-[28px] sm:text-4xl font-serif font-bold text-[#182B33] tracking-tight leading-tight">
               For you
             </h2>
 
-            {lastCollectedAt && (
-              <div className="flex items-center gap-1.5 text-xs text-[#5D717B] font-sans whitespace-nowrap">
-                <span className="w-2 h-2 rounded-full bg-[#2E8B57]" aria-hidden="true" />
-                <span suppressHydrationWarning>Updated {formatTimeAgo(lastCollectedAt)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {lastCollectedAt && (
+                <div className="flex items-center gap-1.5 text-xs text-[#5D717B] font-sans whitespace-nowrap">
+                  <span className="w-2 h-2 rounded-full bg-[#2E8B57]" aria-hidden="true" />
+                  <span suppressHydrationWarning>Updated {formatTimeAgo(lastCollectedAt)}</span>
+                </div>
+              )}
+
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                title="Check feeds for new stories"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#21665D] hover:text-[#184F47] hover:bg-[#EAE4D7] rounded-md transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-[#21665D]" : ""}`} />
+                <span>{isRefreshing ? "Checking feeds..." : "Refresh"}</span>
+              </button>
+            </div>
           </div>
+
+          {refreshToast && (
+            <div className="mt-2 text-xs text-[#21665D] bg-[#EDF2EB] border border-[#C5DCD8] px-3 py-1.5 rounded inline-flex items-center gap-1.5 shadow-2xs">
+              <span>✓</span>
+              <span>{refreshToast}</span>
+            </div>
+          )}
         </div>
 
         {/* Stories Feed */}

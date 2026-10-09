@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { repository } from "@/lib/storage/sqlite-repository";
 import { scoreStory } from "@/lib/ranking/scorer";
+import { preseedSources } from "@/lib/ingestion/preseed";
 
 export async function GET() {
   try {
-    const rawStories = await repository.getStories(60);
+    let rawStories = await repository.getStories(60);
+    if (rawStories.length === 0) {
+      try {
+        await preseedSources(true);
+        rawStories = await repository.getStories(60);
+      } catch (err) {
+        console.warn("Auto-preseed warning on empty feed:", err);
+      }
+    }
+
     const preferences = await repository.getPreferences("zeke");
     const profile = await repository.getLatestProfile("zeke");
 

@@ -10,7 +10,9 @@ import crypto from "crypto";
 const rssParser = new Parser({
   timeout: 10000,
   headers: {
-    "User-Agent": "NotZekeNews-Bot/1.0 (+https://notzekenews.web.app)",
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; NotZekeNews/1.0)",
+    "Accept": "application/rss+xml, application/xml, application/atom+xml, text/xml, */*",
   },
 });
 
