@@ -237,8 +237,8 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
   const bannedTopics = Object.entries(steeredTopics).filter(([_, t]) => t === "banned");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4">
-      <div className="bg-[#F7F5EF] border border-[#182B33] rounded-lg max-w-2xl w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/45 backdrop-blur-xs sm:p-4">
+      <div className="bg-[#F7F5EF] border border-[#182B33] rounded-t-2xl sm:rounded-lg max-w-2xl w-full p-5 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl relative animate-in fade-in zoom-in-95 duration-150 max-h-[92dvh] sm:max-h-[90vh] flex flex-col">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -335,7 +335,7 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
               <div>
                 <div className="flex items-center space-x-1.5 text-xs font-bold text-[#21665D] uppercase tracking-wider mb-2">
                   <Zap className="w-3.5 h-3.5" />
-                  <span>Over-Indexed Topics (+40 Boost)</span>
+                  <span>Topics you want more of</span>
                 </div>
                 {overIndexedTopics.length === 0 ? (
                   <p className="text-xs text-[#7A8E97] italic">No boosted topics yet.</p>
@@ -363,7 +363,7 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
               <div>
                 <div className="flex items-center space-x-1.5 text-xs font-bold text-[#A65B32] uppercase tracking-wider mb-2">
                   <TrendingDown className="w-3.5 h-3.5" />
-                  <span>Under-Indexed Topics (-40 Demote)</span>
+                  <span>Topics you want less of</span>
                 </div>
                 {underIndexedTopics.length === 0 ? (
                   <p className="text-xs text-[#7A8E97] italic">No demoted topics yet.</p>
@@ -510,7 +510,7 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
                         onClick={() => handleSubscribeDiscovered("over_index")}
                         className="px-2.5 py-1 bg-[#21665D] text-white rounded text-xs font-medium hover:bg-[#184F47]"
                       >
-                        ⚡ Boost (+Over-index)
+                        ⚡ Boost
                       </button>
                       <button
                         type="button"
@@ -589,7 +589,7 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
                                   ? "bg-[#21665D] text-white shadow-xs"
                                   : "text-[#5D717B] hover:text-[#21665D]"
                               }`}
-                              title="Over-index source"
+                              title="Show more from this source"
                             >
                               ⚡ Boost
                             </button>
@@ -611,7 +611,7 @@ export function PreferencesModal({ isOpen, onClose, onUpdated }: PreferencesModa
                                   ? "bg-[#A65B32] text-white shadow-xs"
                                   : "text-[#5D717B] hover:text-[#A65B32]"
                               }`}
-                              title="Under-index source"
+                              title="Show less from this source"
                             >
                               📉 Demote
                             </button>

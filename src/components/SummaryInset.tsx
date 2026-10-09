@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sparkles, ArrowUpRight, Check, ThumbsUp, ThumbsDown } from "lucide-react";
 import { SummaryRevision, Citation } from "@/lib/domain/types";
+import { formatTimeAgo } from "@/lib/format";
 
 interface SummaryInsetProps {
   storyId: string;
@@ -18,15 +19,24 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
 
   if (!summary) {
     return (
-      <div className="bg-[#EDF2EB] border-l-2 border-[#21665D] p-5 my-3 rounded-r-md text-sm text-[#5D717B]">
-        <p className="animate-pulse">Preparing agent brief...</p>
+      <div
+        className="bg-[#EDF2EB] border-l-2 border-[#21665D] p-4 sm:p-5 my-3 rounded-r-md"
+        role="status"
+        aria-label="Loading summary"
+      >
+        <div className="animate-pulse space-y-2.5">
+          <div className="h-3 w-24 bg-[#D5E0D2] rounded" />
+          <div className="h-3 w-full bg-[#DCE5D9] rounded" />
+          <div className="h-3 w-11/12 bg-[#DCE5D9] rounded" />
+          <div className="h-3 w-3/4 bg-[#DCE5D9] rounded" />
+        </div>
       </div>
     );
   }
 
   if (summary.status === "unavailable") {
     return (
-      <div className="bg-[#EDF2EB] border-l-2 border-[#C9633F] p-5 my-3 rounded-r-md text-sm text-[#5D717B]">
+      <div className="bg-[#EDF2EB] border-l-2 border-[#C9633F] p-4 sm:p-5 my-3 rounded-r-md text-sm text-[#5D717B]">
         <p className="font-medium text-[#182B33] mb-1">Summary unavailable</p>
         <p className="text-xs text-[#5D717B] mb-3">{summary.markdownText}</p>
         {onRetry && (
@@ -34,7 +44,7 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
             onClick={onRetry}
             className="text-xs font-semibold text-[#21665D] hover:underline"
           >
-            Retry generation
+            Try again
           </button>
         )}
       </div>
@@ -42,14 +52,14 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
   }
 
   return (
-    <div className="bg-[#EDF2EB] border-l-2 border-[#21665D] p-5 my-3.5 rounded-r-md shadow-sm transition-all duration-150">
+    <div className="bg-[#EDF2EB] border-l-2 border-[#21665D] p-4 sm:p-5 my-3 sm:my-3.5 rounded-r-md shadow-sm transition-all duration-150">
       {/* Top Header */}
-      <div className="flex items-center justify-between pb-3 text-xs tracking-wider font-semibold text-[#21665D]">
+      <div className="flex items-center justify-between pb-2.5 sm:pb-3 text-xs tracking-wider font-semibold text-[#21665D]">
         <div className="flex items-center space-x-1.5 uppercase">
           <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
-          <span>Agent Brief</span>
+          <span>Summary</span>
         </div>
-        <span className="text-[#5D717B] font-normal tracking-normal text-xs">
+        <span className="text-[#5D717B] font-normal tracking-normal text-xs" suppressHydrationWarning>
           Updated {formatTimeAgo(summary.updatedAt)}
         </span>
       </div>
@@ -86,13 +96,13 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
       )}
 
       {/* Divider */}
-      <div className="border-t border-[#DFE7DD] mt-3 pt-3 flex flex-wrap items-center justify-between text-xs text-[#5D717B]">
+      <div className="border-t border-[#DFE7DD] mt-3 pt-2 sm:pt-3 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-y-1 text-xs text-[#5D717B]">
         {/* Story Relevance Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 min-h-[32px]">
           {votedRelevance ? (
             <span className="inline-flex items-center text-[#21665D] font-medium">
               <Check className="w-3.5 h-3.5 mr-1" />
-              Relevance feedback recorded
+              Thanks — we&apos;ll tune your feed
             </span>
           ) : (
             <>
@@ -101,7 +111,7 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
                   setVotedRelevance("positive");
                   onFeedback("relevance_positive");
                 }}
-                className="hover:text-[#21665D] hover:underline transition-colors focus:outline-none"
+                className="py-1.5 hover:text-[#21665D] hover:underline transition-colors focus:outline-none"
               >
                 More like this
               </button>
@@ -111,7 +121,7 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
                   setVotedRelevance("negative");
                   onFeedback("relevance_negative");
                 }}
-                className="hover:text-[#C9633F] hover:underline transition-colors focus:outline-none"
+                className="py-1.5 hover:text-[#C9633F] hover:underline transition-colors focus:outline-none"
               >
                 Less like this
               </button>
@@ -119,15 +129,12 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
           )}
         </div>
 
-        {/* Separator */}
-        <span className="hidden sm:inline text-[#C2CEC0]">|</span>
-
         {/* Summary Writing Quality Controls */}
-        <div className="flex items-center space-x-1.5 mt-2 sm:mt-0">
-          <span className="text-[#5D717B]">Summary:</span>
+        <div className="flex items-center space-x-1.5 min-h-[32px]">
+          <span className="text-[#5D717B]">Was this summary helpful?</span>
           {votedQuality ? (
             <span className="text-[#21665D] font-medium ml-1">
-              Feedback saved
+              Thanks!
             </span>
           ) : (
             <>
@@ -136,16 +143,16 @@ export function SummaryInset({ storyId, summary, onFeedback, onRetry }: SummaryI
                   setVotedQuality("helpful");
                   onFeedback("summary_helpful");
                 }}
-                className="font-medium text-[#21665D] hover:underline focus:outline-none ml-1"
+                className="py-1.5 font-medium text-[#21665D] hover:underline focus:outline-none ml-1"
               >
-                Helpful
+                Yes
               </button>
               <span className="text-[#C2CEC0]">·</span>
               <button
                 onClick={() => setShowQualityDetails(!showQualityDetails)}
-                className="font-medium text-[#5D717B] hover:text-[#C9633F] hover:underline focus:outline-none"
+                className="py-1.5 font-medium text-[#5D717B] hover:text-[#C9633F] hover:underline focus:outline-none"
               >
-                Needs improvement
+                No
               </button>
             </>
           )}
@@ -204,18 +211,4 @@ function renderTextWithCitations(text: string, citations?: Citation[]) {
     }
     return <span key={index}>{part}</span>;
   });
-}
-
-function formatTimeAgo(isoString: string): string {
-  try {
-    const elapsedMs = Date.now() - new Date(isoString).getTime();
-    const minutes = Math.floor(elapsedMs / (1000 * 60));
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes} minutes ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return "earlier";
-  } catch {
-    return "recently";
-  }
 }

@@ -6,6 +6,7 @@ import { StoryRow } from "@/components/StoryRow";
 import { AddLinkModal } from "@/components/AddLinkModal";
 import { PreferencesModal } from "@/components/PreferencesModal";
 import { Story } from "@/lib/domain/types";
+import { formatTimeAgo } from "@/lib/format";
 
 export default function FeedPage() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -59,9 +60,15 @@ export default function FeedPage() {
     }
   };
 
+  const todayLabel = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="min-h-screen bg-[#F7F5EF] text-[#182B33]">
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:py-12">
         {/* Masthead */}
         <Header
           onOpenAddLink={() => setIsAddLinkOpen(true)}
@@ -69,25 +76,23 @@ export default function FeedPage() {
         />
 
         {/* Feed Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between text-xs tracking-wider text-[#7A8E97] uppercase font-semibold font-sans mb-1">
-            <span>DESIGN CONCEPT · SAMPLE STORIES</span>
+        <div className="mb-3 sm:mb-6">
+          <div className="text-[11px] sm:text-xs tracking-wider text-[#7A8E97] uppercase font-semibold font-sans mb-1">
+            <span suppressHydrationWarning>{todayLabel}</span>
           </div>
 
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#182B33] tracking-tight">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-[28px] sm:text-4xl font-serif font-bold text-[#182B33] tracking-tight leading-tight">
               For you
             </h2>
 
-            <div className="flex items-center space-x-1.5 text-xs text-[#5D717B] font-sans">
-              <span className="w-2 h-2 rounded-full bg-[#2E8B57]" />
-              <span>Collected 12 minutes ago</span>
-            </div>
+            {lastCollectedAt && (
+              <div className="flex items-center gap-1.5 text-xs text-[#5D717B] font-sans whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-[#2E8B57]" aria-hidden="true" />
+                <span suppressHydrationWarning>Updated {formatTimeAgo(lastCollectedAt)}</span>
+              </div>
+            )}
           </div>
-
-          <p className="text-sm text-[#5D717B] mt-1.5 font-sans">
-            Click a headline for a summary. Follow a source to read more.
-          </p>
         </div>
 
         {/* Stories Feed */}

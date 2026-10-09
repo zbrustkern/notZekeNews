@@ -34,10 +34,10 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
     onSteer(targetType, name, tier);
     const label =
       tier === "over_index"
-        ? `Over-indexed ${name}`
+        ? `Showing more ${name}`
         : tier === "under_index"
-        ? `Under-indexed ${name}`
-        : `Muted ${name}`;
+        ? `Showing less ${name}`
+        : `Hid ${name}`;
     setFeedbackToast(label);
     setTimeout(() => {
       setFeedbackToast(null);
@@ -53,8 +53,8 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
           setIsOpen(!isOpen);
           setShowWhy(false);
         }}
-        aria-label="Tuning and steering options"
-        className="w-8 h-8 rounded-full hover:bg-[#EAE4D7] text-[#5D717B] hover:text-[#182B33] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#21665D]"
+        aria-label="Story options"
+        className="w-10 h-10 sm:w-8 sm:h-8 rounded-full hover:bg-[#EAE4D7] text-[#5D717B] hover:text-[#182B33] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#21665D]"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>
@@ -62,7 +62,7 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 top-9 z-30 w-72 bg-[#FAF8F3] border border-[#D5DDD3] rounded-lg shadow-xl py-2 text-xs font-sans text-[#182B33] animate-in fade-in zoom-in-95 duration-100"
+          className="absolute right-0 top-10 sm:top-9 z-30 w-72 max-w-[calc(100vw-2rem)] bg-[#FAF8F3] border border-[#D5DDD3] rounded-lg shadow-xl py-2 text-xs font-sans text-[#182B33] animate-in fade-in zoom-in-95 duration-100"
         >
           {feedbackToast ? (
             <div className="p-4 text-center text-[#21665D] font-medium flex items-center justify-center space-x-1.5">
@@ -74,7 +74,7 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
               <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD1]">
                 <span className="font-semibold text-[#182B33] flex items-center">
                   <Info className="w-3.5 h-3.5 mr-1 text-[#21665D]" />
-                  Recommendation Rationale
+                  Why you’re seeing this
                 </span>
                 <button
                   onClick={() => setShowWhy(false)}
@@ -83,8 +83,8 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
                   Back
                 </button>
               </div>
-              <p className="text-[#3A4D56] text-[11px] leading-relaxed">
-                {story.rankingExplanation || `Score: ${story.rankingScore || 70} pts · Ranked by topic affinity and freshness.`}
+              <p className="text-[#3A4D56] text-xs leading-relaxed">
+                {story.rankingExplanation || `Based on your interest in ${story.primaryTopic} and how recent this story is.`}
               </p>
             </div>
           ) : (
@@ -96,24 +96,24 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
                 </div>
                 <button
                   onClick={() => handleAction("topic", story.primaryTopic, "over_index")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-[#EDF2EB] text-[#21665D] font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-[#EDF2EB] text-[#21665D] font-medium flex items-center space-x-2 transition-colors"
                 >
                   <Zap className="w-3.5 h-3.5 text-[#21665D]" />
-                  <span>Over-index this topic (+boost)</span>
+                  <span>Show more from this topic</span>
                 </button>
                 <button
                   onClick={() => handleAction("topic", story.primaryTopic, "under_index")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-[#F6EFEB] text-[#A65B32] font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-[#F6EFEB] text-[#A65B32] font-medium flex items-center space-x-2 transition-colors"
                 >
                   <TrendingDown className="w-3.5 h-3.5 text-[#A65B32]" />
-                  <span>Under-index this topic (demote)</span>
+                  <span>Show less from this topic</span>
                 </button>
                 <button
                   onClick={() => handleAction("topic", story.primaryTopic, "banned")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-red-50 text-red-700 font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-red-50 text-red-700 font-medium flex items-center space-x-2 transition-colors"
                 >
                   <Ban className="w-3.5 h-3.5 text-red-600" />
-                  <span>Mute &quot;{story.primaryTopic}&quot; completely</span>
+                  <span>Hide this topic</span>
                 </button>
               </div>
 
@@ -124,24 +124,24 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
                 </div>
                 <button
                   onClick={() => handleAction("source", story.leadSourceName, "over_index")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-[#EDF2EB] text-[#21665D] font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-[#EDF2EB] text-[#21665D] font-medium flex items-center space-x-2 transition-colors"
                 >
                   <Zap className="w-3.5 h-3.5 text-[#21665D]" />
-                  <span>Over-index this source (+boost)</span>
+                  <span>Show more from this source</span>
                 </button>
                 <button
                   onClick={() => handleAction("source", story.leadSourceName, "under_index")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-[#F6EFEB] text-[#A65B32] font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-[#F6EFEB] text-[#A65B32] font-medium flex items-center space-x-2 transition-colors"
                 >
                   <TrendingDown className="w-3.5 h-3.5 text-[#A65B32]" />
-                  <span>Under-index this source (demote)</span>
+                  <span>Show less from this source</span>
                 </button>
                 <button
                   onClick={() => handleAction("source", story.leadSourceName, "banned")}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-red-50 text-red-700 font-medium flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-red-50 text-red-700 font-medium flex items-center space-x-2 transition-colors"
                 >
                   <Ban className="w-3.5 h-3.5 text-red-600" />
-                  <span>Ban this source completely</span>
+                  <span>Hide this source</span>
                 </button>
               </div>
 
@@ -149,10 +149,10 @@ export function StoryMenu({ story, onSteer }: StoryMenuProps) {
               <div className="px-3 pt-1.5">
                 <button
                   onClick={() => setShowWhy(true)}
-                  className="w-full text-left py-1 px-1.5 rounded hover:bg-[#EAE4D7] text-[#5D717B] hover:text-[#182B33] flex items-center space-x-2 transition-colors"
+                  className="w-full text-left py-2 sm:py-1 px-1.5 rounded hover:bg-[#EAE4D7] text-[#5D717B] hover:text-[#182B33] flex items-center space-x-2 transition-colors"
                 >
                   <Info className="w-3.5 h-3.5 text-[#5D717B]" />
-                  <span>Why was this recommended?</span>
+                  <span>Why am I seeing this?</span>
                 </button>
               </div>
             </>

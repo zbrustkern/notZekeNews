@@ -48,8 +48,8 @@ export function AddLinkModal({ isOpen, onClose, onSuccess }: AddLinkModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-      <div className="bg-[#F7F5EF] border border-[#182B33] rounded-lg max-w-lg w-full p-6 shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-xs sm:p-4">
+      <div className="bg-[#F7F5EF] border border-[#182B33] rounded-t-2xl sm:rounded-lg max-w-lg w-full p-5 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] max-h-[92dvh] overflow-y-auto shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-[#5D717B] hover:text-[#182B33] p-1 rounded-md transition-colors"

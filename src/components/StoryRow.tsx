@@ -5,6 +5,7 @@ import { ChevronRight, ArrowUpRight, Undo2 } from "lucide-react";
 import { Story, SteeringTier } from "@/lib/domain/types";
 import { SummaryInset } from "./SummaryInset";
 import { StoryMenu } from "./StoryMenu";
+import { formatTimeAgo } from "@/lib/format";
 
 interface StoryRowProps {
   story: Story;
@@ -51,7 +52,7 @@ export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps)
     return (
       <div className="py-4 px-3 my-2 bg-[#F5EBE6] border border-[#ECD1C6] rounded-md text-xs text-[#A65B32] flex items-center justify-between transition-all">
         <span>
-          Muted {bannedState.targetType} <strong>{bannedState.name}</strong>. Future stories will be excluded.
+          You won’t see stories from <strong>{bannedState.name}</strong> anymore.
         </span>
         <button
           onClick={handleUndoBan}
@@ -66,20 +67,26 @@ export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps)
 
   return (
     <article
-      className={`border-b border-[#E2DDD1] py-5 transition-colors ${
+      className={`border-b border-[#E2DDD1] py-4 sm:py-5 transition-colors ${
         isFirst && !isExpanded ? "bg-[#FAF8F3] -mx-4 px-4 rounded-md" : ""
       }`}
     >
-      {/* Topic Badge & Header */}
-      <div className="flex items-center space-x-2 mb-1.5">
-        <span className="text-[11px] font-bold tracking-wider text-[#C9633F] uppercase font-sans">
-          {story.primaryTopic}
-        </span>
-        {story.isUserSubmitted && (
-          <span className="text-[10px] bg-[#E8F0EE] text-[#21665D] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            Added by you
+      {/* Topic Badge & Options */}
+      <div className="flex items-center justify-between gap-2 mb-1 sm:mb-1.5 min-h-[24px]">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[11px] font-bold tracking-wider text-[#C9633F] uppercase font-sans truncate">
+            {story.primaryTopic}
           </span>
-        )}
+          {story.isUserSubmitted && (
+            <span className="text-[10px] bg-[#E8F0EE] text-[#21665D] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+              Added by you
+            </span>
+          )}
+        </div>
+
+        <div className="sm:hidden -mr-2 flex-shrink-0">
+          <StoryMenu story={story} onSteer={handleSteer} />
+        </div>
       </div>
 
       {/* Main Headline & Controls Row */}
@@ -88,15 +95,15 @@ export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps)
           onClick={toggleExpansion}
           onKeyDown={handleKeyDown}
           aria-expanded={isExpanded}
-          className="text-left group flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21665D] rounded"
+          className="text-left group flex-1 min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21665D] rounded"
         >
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#182B33] leading-snug group-hover:text-[#21665D] transition-colors">
+          <h2 className="text-[19px] sm:text-2xl font-serif font-bold text-[#182B33] leading-snug group-hover:text-[#21665D] transition-colors">
             {story.headline}
           </h2>
         </button>
 
-        {/* Action Controls: StoryMenu + Chevron */}
-        <div className="flex items-center space-x-1.5 flex-shrink-0 pt-0.5">
+        {/* Action Controls: StoryMenu + Chevron (desktop) */}
+        <div className="hidden sm:flex items-center space-x-1.5 flex-shrink-0 pt-0.5">
           <StoryMenu story={story} onSteer={handleSteer} />
 
           <button
@@ -114,10 +121,10 @@ export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps)
       </div>
 
       {/* Metadata Line */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#5D717B] mt-2 font-sans">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] sm:text-sm text-[#5D717B] mt-1.5 sm:mt-2 font-sans">
         <span>{story.leadSourceName}</span>
         <span className="text-[#C2CEC0]">·</span>
-        <span>{formatTimeAgo(story.leadPublishedAt || story.leadDiscoveredAt)}</span>
+        <span suppressHydrationWarning>{formatTimeAgo(story.leadPublishedAt || story.leadDiscoveredAt)}</span>
         <span className="text-[#C2CEC0]">·</span>
         <a
           href={story.readOriginalUrl}
@@ -165,21 +172,4 @@ export function StoryRow({ story, isFirst, onFeedback, onSteer }: StoryRowProps)
       )}
     </article>
   );
-}
-
-function formatTimeAgo(isoString?: string): string {
-  if (!isoString) return "recently";
-  try {
-    const elapsedMs = Date.now() - new Date(isoString).getTime();
-    const minutes = Math.floor(elapsedMs / (1000 * 60));
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes} minutes ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    const days = Math.floor(hours / 24);
-    if (days === 1) return "Yesterday";
-    return `${days} days ago`;
-  } catch {
-    return "recently";
-  }
 }
