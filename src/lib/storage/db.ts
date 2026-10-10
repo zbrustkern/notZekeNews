@@ -4,12 +4,36 @@ import * as schema from "./schema";
 import path from "path";
 import fs from "fs";
 
-const dataDir = path.join(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+function resolveDbPath(): string {
+  if (process.env.DB_PATH) {
+    return process.env.DB_PATH;
+  }
+
+  const isServerless = Boolean(
+    process.env.K_SERVICE ||
+    process.env.K_REVISION ||
+    process.env.FIREBASE_CONFIG ||
+    process.env.NODE_ENV === "production"
+  );
+
+  if (isServerless) {
+    const tmpDir = "/tmp/notzekenews";
+    if (!fs.existsSync(tmpDir)) {
+      try {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      } catch {}
+    }
+    return path.join(tmpDir, "notzekenews.db");
+  }
+
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return path.join(dataDir, "notzekenews.db");
 }
 
-const dbPath = path.join(dataDir, "notzekenews.db");
+const dbPath = resolveDbPath();
 const sqlite = new Database(dbPath);
 
 // Enable WAL mode for concurrent read/write performance
@@ -153,6 +177,21 @@ export function initializeDatabase() {
   } catch {}
   try {
     sqlite.exec("ALTER TABLE preferences ADD COLUMN steered_sources_json TEXT NOT NULL DEFAULT '{}';");
+  } catch {}
+
+  // Seed default sources if not present
+  try {
+    sqlite.exec(`
+      INSERT OR IGNORE INTO sources (id, name, feed_url, site_url, category, is_enabled, health_status)
+      VALUES
+        ('src_marginalrev', 'Marginal Revolution', 'https://marginalrevolution.com/feed', 'https://marginalrevolution.com', 'SYSTEMS', 1, 'healthy'),
+        ('src_techcrunch', 'TechCrunch', 'https://techcrunch.com/feed/', 'https://techcrunch.com', 'ENGINEERING', 1, 'healthy'),
+        ('src_mittechreview', 'MIT Technology Review', 'https://www.technologyreview.com/feed/', 'https://www.technologyreview.com', 'SCIENCE', 1, 'healthy'),
+        ('src_hn', 'Hacker News', 'https://news.ycombinator.com/rss', 'https://news.ycombinator.com', 'SYSTEMS', 1, 'healthy'),
+        ('src_danluu', 'Dan Luu', 'https://danluu.com/atom.xml', 'https://danluu.com', 'SYSTEMS', 1, 'healthy'),
+        ('src_simon', 'Simon Willison', 'https://simonwillison.net/atom/entries/', 'https://simonwillison.net', 'ENGINEERING', 1, 'healthy'),
+        ('src_ars', 'Ars Technica', 'https://feeds.arstechnica.com/arstechnica/index', 'https://arstechnica.com', 'SCIENCE', 1, 'healthy');
+    `);
   } catch {}
 }
 
