@@ -4,6 +4,8 @@ import { Source, TopicCategory, SteeringTier } from "@/lib/domain/types";
 import { pollSource } from "@/lib/ingestion/collector";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const sources = await repository.getSources(false);

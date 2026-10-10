@@ -3,6 +3,9 @@ import { runCollection } from "@/lib/ingestion/collector";
 import { preseedSources } from "@/lib/ingestion/preseed";
 import { repository } from "@/lib/storage/sqlite-repository";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function POST() {
   try {
     const existingSources = await repository.getSources(true);

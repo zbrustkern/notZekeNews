@@ -5,6 +5,8 @@ import { normalizeUrl, safeFetchText } from "@/lib/ingestion/fetcher";
 import { extractArticleContent } from "@/lib/ingestion/collector";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { url, note } = await request.json();

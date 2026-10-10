@@ -36,14 +36,19 @@ function resolveDbPath(): string {
 const dbPath = resolveDbPath();
 const sqlite = new Database(dbPath);
 
-// Enable WAL mode for concurrent read/write performance
+// Enable WAL mode and 10s busy timeout for concurrent read/write performance
 sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("busy_timeout = 10000");
 
 export const db = drizzle(sqlite, { schema });
 
+let hasInitialized = false;
+
 // Auto-initialize schema tables if they do not exist
 export function initializeDatabase() {
-  sqlite.exec(`
+  if (hasInitialized) return;
+  try {
+    sqlite.exec(`
     CREATE TABLE IF NOT EXISTS articles (
       id TEXT PRIMARY KEY,
       canonical_url TEXT NOT NULL UNIQUE,
@@ -193,6 +198,13 @@ export function initializeDatabase() {
         ('src_ars', 'Ars Technica', 'https://feeds.arstechnica.com/arstechnica/index', 'https://arstechnica.com', 'SCIENCE', 1, 'healthy');
     `);
   } catch {}
+
+    hasInitialized = true;
+  } catch (err: any) {
+    if (err?.code !== "SQLITE_BUSY") {
+      console.warn("Database init warning:", err);
+    }
+  }
 }
 
 // Run table creation on import

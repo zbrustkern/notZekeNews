@@ -3,6 +3,8 @@ import { repository } from "@/lib/storage/sqlite-repository";
 import { SteeringTier, InteractionEvent } from "@/lib/domain/types";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { targetType, name, tier } = (await request.json()) as {

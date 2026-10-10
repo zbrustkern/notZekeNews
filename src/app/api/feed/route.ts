@@ -3,6 +3,8 @@ import { repository } from "@/lib/storage/sqlite-repository";
 import { scoreStory } from "@/lib/ranking/scorer";
 import { preseedSources } from "@/lib/ingestion/preseed";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     let rawStories = await repository.getStories(60);

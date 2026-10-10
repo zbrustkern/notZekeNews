@@ -113,28 +113,32 @@ export async function pollSource(source: Source): Promise<IngestionResult> {
         topics: [source.category],
       };
 
-      await repository.saveArticle(newArticle);
-      result.newArticles++;
+      try {
+        await repository.saveArticle(newArticle);
+        result.newArticles++;
 
-      // Conservative Story Creation:
-      // In Milestone 1, each new distinct article becomes its own standalone Story
-      const storyId = `story_${articleId.replace("art_", "")}`;
-      const newStory: Story = {
-        id: storyId,
-        headline: newArticle.title,
-        primaryTopic: source.category,
-        leadArticleId: newArticle.id,
-        leadSourceName: source.name,
-        leadPublishedAt: newArticle.publishedAt,
-        leadDiscoveredAt: newArticle.discoveredAt,
-        readOriginalUrl: newArticle.originalUrl,
-        relatedCoverage: [],
-        articleIds: [newArticle.id],
-        rankingScore: 70, // Baseline score
-      };
+        // Conservative Story Creation:
+        // In Milestone 1, each new distinct article becomes its own standalone Story
+        const storyId = `story_${articleId.replace("art_", "")}`;
+        const newStory: Story = {
+          id: storyId,
+          headline: newArticle.title,
+          primaryTopic: source.category,
+          leadArticleId: newArticle.id,
+          leadSourceName: source.name,
+          leadPublishedAt: newArticle.publishedAt,
+          leadDiscoveredAt: newArticle.discoveredAt,
+          readOriginalUrl: newArticle.originalUrl,
+          relatedCoverage: [],
+          articleIds: [newArticle.id],
+          rankingScore: 70, // Baseline score
+        };
 
-      await repository.saveStory(newStory);
-      result.newStories++;
+        await repository.saveStory(newStory);
+        result.newStories++;
+      } catch (itemErr: any) {
+        result.errors.push(`Item save warning for "${newArticle.title}": ${itemErr.message}`);
+      }
     }
 
     await repository.updateSourceStats(source.id, "healthy", new Date().toISOString(), result.newArticles);
@@ -152,34 +156,23 @@ export async function pollSource(source: Source): Promise<IngestionResult> {
 export async function runCollection(): Promise<IngestionResult[]> {
   const startTime = new Date().toISOString();
   const sources = await repository.getSources(true);
-  const pollPromises = sources.map(async (src) => {
+  const results: IngestionResult[] = [];
+
+  for (const src of sources) {
     try {
-      return await pollSource(src);
+      const res = await pollSource(src);
+      results.push(res);
     } catch (err: any) {
-      return {
+      results.push({
         sourceId: src.id,
         sourceName: src.name,
         fetchedItems: 0,
         newArticles: 0,
         newStories: 0,
         errors: [`Uncaught error polling ${src.name}: ${err.message}`],
-      };
+      });
     }
-  });
-
-  const settled = await Promise.allSettled(pollPromises);
-  const results: IngestionResult[] = settled.map((s, idx) =>
-    s.status === "fulfilled"
-      ? s.value
-      : {
-          sourceId: sources[idx].id,
-          sourceName: sources[idx].name,
-          fetchedItems: 0,
-          newArticles: 0,
-          newStories: 0,
-          errors: [`Failed: ${s.reason}`],
-        }
-  );
+  }
 
   // Record collection run
   const totalArticles = results.reduce((sum, r) => sum + r.newArticles, 0);

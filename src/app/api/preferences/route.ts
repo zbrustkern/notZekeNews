@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { repository } from "@/lib/storage/sqlite-repository";
 import { Preference } from "@/lib/domain/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const prefs = await repository.getPreferences("zeke");
   return NextResponse.json(prefs);

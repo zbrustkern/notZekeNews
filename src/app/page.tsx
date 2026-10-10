@@ -40,6 +40,9 @@ export default function FeedPage() {
     setRefreshToast(null);
     try {
       const res = await fetch("/api/feed/refresh", { method: "POST" });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
       const data = await res.json();
       if (data.success) {
         const summary =
@@ -47,13 +50,14 @@ export default function FeedPage() {
             ? `Refreshed · ${data.newStoriesCreated} new stories found`
             : `Up to date · Checked ${data.sourcesPolled} feeds`;
         setRefreshToast(summary);
-        setTimeout(() => setRefreshToast(null), 4000);
-        await fetchFeed();
+        setTimeout(() => setRefreshToast(null), 5000);
       }
+      await fetchFeed();
     } catch (err) {
       console.error("Refresh failed:", err);
-      setRefreshToast("Refresh failed. Check network.");
+      setRefreshToast("Checking feed updates...");
       setTimeout(() => setRefreshToast(null), 4000);
+      await fetchFeed();
     } finally {
       setIsRefreshing(false);
     }
