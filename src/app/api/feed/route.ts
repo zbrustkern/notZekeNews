@@ -8,8 +8,14 @@ export async function GET() {
     let rawStories = await repository.getStories(60);
     if (rawStories.length === 0) {
       try {
-        await preseedSources(true);
-        rawStories = await repository.getStories(60);
+        const { added } = await preseedSources(false);
+        if (added.length > 0) {
+          import("@/lib/ingestion/collector").then(({ pollSource }) => {
+            Promise.allSettled(added.map((src) => pollSource(src))).catch((err) => {
+              console.warn("Background preseed poll warning:", err);
+            });
+          });
+        }
       } catch (err) {
         console.warn("Auto-preseed warning on empty feed:", err);
       }

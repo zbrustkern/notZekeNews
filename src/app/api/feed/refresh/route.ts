@@ -10,7 +10,7 @@ export async function POST() {
     let preseededCount = 0;
     // Auto-preseed if there are no or very few enabled sources
     if (existingSources.length < 2) {
-      const preseedResult = await preseedSources(true);
+      const preseedResult = await preseedSources(false);
       preseededCount = preseedResult.added.length;
     }
 
