@@ -192,10 +192,12 @@ export function initializeDatabase() {
         ('src_marginalrev', 'Marginal Revolution', 'https://marginalrevolution.com/feed', 'https://marginalrevolution.com', 'SYSTEMS', 1, 'healthy'),
         ('src_techcrunch', 'TechCrunch', 'https://techcrunch.com/feed/', 'https://techcrunch.com', 'ENGINEERING', 1, 'healthy'),
         ('src_mittechreview', 'MIT Technology Review', 'https://www.technologyreview.com/feed/', 'https://www.technologyreview.com', 'SCIENCE', 1, 'healthy'),
-        ('src_hn', 'Hacker News', 'https://news.ycombinator.com/rss', 'https://news.ycombinator.com', 'SYSTEMS', 1, 'healthy'),
+        ('src_hn', 'Hacker News', 'https://hnrss.org/frontpage', 'https://news.ycombinator.com', 'SYSTEMS', 1, 'healthy'),
         ('src_danluu', 'Dan Luu', 'https://danluu.com/atom.xml', 'https://danluu.com', 'SYSTEMS', 1, 'healthy'),
         ('src_simon', 'Simon Willison', 'https://simonwillison.net/atom/entries/', 'https://simonwillison.net', 'ENGINEERING', 1, 'healthy'),
         ('src_ars', 'Ars Technica', 'https://feeds.arstechnica.com/arstechnica/index', 'https://arstechnica.com', 'SCIENCE', 1, 'healthy');
+
+      UPDATE sources SET feed_url = 'https://hnrss.org/frontpage' WHERE id = 'src_hn' AND feed_url = 'https://news.ycombinator.com/rss';
     `);
   } catch {}
 

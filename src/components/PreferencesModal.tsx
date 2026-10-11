@@ -28,7 +28,7 @@ const PRESET_SOURCES = [
   { name: "Marginal Revolution", url: "https://marginalrevolution.com/feed", category: "SYSTEMS" as TopicCategory },
   { name: "TechCrunch", url: "https://techcrunch.com/feed/", category: "ENGINEERING" as TopicCategory },
   { name: "MIT Technology Review", url: "https://www.technologyreview.com/feed/", category: "SCIENCE" as TopicCategory },
-  { name: "Hacker News", url: "https://news.ycombinator.com/rss", category: "SYSTEMS" as TopicCategory },
+  { name: "Hacker News", url: "https://hnrss.org/frontpage", category: "SYSTEMS" as TopicCategory },
   { name: "Dan Luu", url: "https://danluu.com/atom.xml", category: "SYSTEMS" as TopicCategory },
   { name: "Simon Willison", url: "https://simonwillison.net/atom/entries/", category: "ENGINEERING" as TopicCategory },
   { name: "Lobste.rs", url: "https://lobste.rs/rss", category: "SYSTEMS" as TopicCategory },

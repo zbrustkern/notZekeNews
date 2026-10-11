@@ -347,18 +347,25 @@ export class SqliteNewsRepository implements INewsRepository {
     lastPolled: string,
     articlesDelta = 0
   ): Promise<void> {
-    const existing = db.select().from(sourcesTable).where(eq(sourcesTable.id, id)).get();
-    if (!existing) return;
+    try {
+      const existing = db.select().from(sourcesTable).where(eq(sourcesTable.id, id)).get();
+      if (!existing) return;
 
-    db.update(sourcesTable)
-      .set({
-        healthStatus: health,
-        lastPolledAt: lastPolled,
-        articlesCount: existing.articlesCount + articlesDelta,
-        consecutiveFailures: health === "healthy" ? 0 : existing.consecutiveFailures + 1,
-      })
-      .where(eq(sourcesTable.id, id))
-      .run();
+      const currentArticles = typeof existing.articlesCount === "number" ? existing.articlesCount : 0;
+      const currentFailures = typeof existing.consecutiveFailures === "number" ? existing.consecutiveFailures : 0;
+
+      db.update(sourcesTable)
+        .set({
+          healthStatus: health,
+          lastPolledAt: lastPolled,
+          articlesCount: currentArticles + (Number(articlesDelta) || 0),
+          consecutiveFailures: health === "healthy" ? 0 : currentFailures + 1,
+        })
+        .where(eq(sourcesTable.id, id))
+        .run();
+    } catch (err) {
+      console.warn(`Could not update source stats for ${id}:`, err);
+    }
   }
 
   async saveSubmission(submission: Submission): Promise<void> {

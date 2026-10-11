@@ -9,7 +9,7 @@ export async function runSeed() {
     {
       id: "src_hn",
       name: "Hacker News Top",
-      feedUrl: "https://news.ycombinator.com/rss",
+      feedUrl: "https://hnrss.org/frontpage",
       siteUrl: "https://news.ycombinator.com",
       category: "SYSTEMS",
       isEnabled: true,

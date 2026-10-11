@@ -35,7 +35,7 @@ export const PRESEED_SOURCES: PreseedSourceDefinition[] = [
   {
     id: "src_hn",
     name: "Hacker News",
-    feedUrl: "https://news.ycombinator.com/rss",
+    feedUrl: "https://hnrss.org/frontpage",
     siteUrl: "https://news.ycombinator.com",
     category: "SYSTEMS",
   },
