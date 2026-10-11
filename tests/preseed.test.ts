@@ -1,21 +1,22 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { PRESEED_SOURCES, preseedSources } from "@/lib/ingestion/preseed";
-import { repository } from "@/lib/storage/sqlite-repository";
-import { db } from "@/lib/storage/db";
-import { sourcesTable } from "@/lib/storage/schema";
-import { inArray } from "drizzle-orm";
+import { repository } from "@/lib/storage/firestore-repository";
 
 describe("Preseed Sources & Feed Refresh", () => {
   const preseedIds = PRESEED_SOURCES.map((s) => s.id);
 
   beforeEach(async () => {
     // Clean up preseed sources before testing
-    db.delete(sourcesTable).where(inArray(sourcesTable.id, preseedIds)).run();
+    for (const id of preseedIds) {
+      await repository.deleteSource(id);
+    }
   });
 
   afterEach(async () => {
     // Clean up
-    db.delete(sourcesTable).where(inArray(sourcesTable.id, preseedIds)).run();
+    for (const id of preseedIds) {
+      await repository.deleteSource(id);
+    }
   });
 
   it("contains Marginal Revolution, TechCrunch, and MIT Technology Review in PRESEED_SOURCES", () => {

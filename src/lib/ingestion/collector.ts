@@ -1,8 +1,6 @@
 import Parser from "rss-parser";
 import * as cheerio from "cheerio";
-import { repository } from "../storage/sqlite-repository";
-import { db } from "../storage/db";
-import { collectionRunsTable } from "../storage/schema";
+import { firestoreRepository, repository } from "../storage/firestore-repository";
 import { Article, Story, Source, TopicCategory } from "../domain/types";
 import { normalizeUrl, safeFetchText } from "./fetcher";
 import crypto from "crypto";
@@ -179,22 +177,16 @@ export async function runCollection(): Promise<IngestionResult[]> {
   const totalStories = results.reduce((sum, r) => sum + r.newStories, 0);
   const allErrors = results.flatMap((r) => r.errors);
 
-  try {
-    db.insert(collectionRunsTable)
-      .values({
-        id: `run_${Date.now()}`,
-        startedAt: startTime,
-        completedAt: new Date().toISOString(),
-        sourcesPolled: sources.length,
-        articlesFound: totalArticles,
-        newStoriesCreated: totalStories,
-        summariesGenerated: 0,
-        errorsJson: JSON.stringify(allErrors),
-      })
-      .run();
-  } catch (err) {
-    console.error("Failed to record collection run:", err);
-  }
+  await firestoreRepository.recordCollectionRun({
+    id: `run_${Date.now()}`,
+    startedAt: startTime,
+    completedAt: new Date().toISOString(),
+    sourcesPolled: sources.length,
+    articlesFound: totalArticles,
+    newStoriesCreated: totalStories,
+    summariesGenerated: 0,
+    errors: allErrors,
+  });
 
   return results;
 }

@@ -1,12 +1,4 @@
-import { db } from "../storage/db";
-import {
-  articlesTable,
-  storiesTable,
-  collectionRunsTable,
-  interactionEventsTable,
-} from "../storage/schema";
 import { repository } from "../storage/sqlite-repository";
-import { sql, desc } from "drizzle-orm";
 
 export interface SourcesHealth {
   total: number;
@@ -60,55 +52,34 @@ export async function getSystemHealth(readerId = "zeke"): Promise<SystemHealthMe
     status = failingSources === totalSources && totalSources > 0 ? "failing" : "degraded";
   }
 
-  // 2. Total articles
-  const articleCountRow = db
-    .select({ count: sql<number>`count(*)` })
-    .from(articlesTable)
-    .get();
-  const totalArticles = articleCountRow?.count ?? 0;
+  // 2. Stories and articles
+  const stories = await repository.getStories(1000);
+  const totalStories = stories.length;
+  const distinctArticleIds = new Set(stories.flatMap((s) => s.articleIds));
+  const totalArticles = Math.max(distinctArticleIds.size, totalStories);
 
-  // 3. Total stories
-  const storyCountRow = db
-    .select({ count: sql<number>`count(*)` })
-    .from(storiesTable)
-    .get();
-  const totalStories = storyCountRow?.count ?? 0;
-
-  // 4. Last collection run timestamp
-  const lastRun = db
-    .select()
-    .from(collectionRunsTable)
-    .orderBy(desc(collectionRunsTable.startedAt))
-    .limit(1)
-    .get();
-
+  // 3. Last collection run timestamp
   let lastCollectionRun: string | null = null;
-  if (lastRun) {
-    lastCollectionRun = lastRun.completedAt || lastRun.startedAt;
-  } else {
-    // Fallback: check most recent source poll timestamp
-    const polledDates = sources
-      .map((s) => s.lastPolledAt)
-      .filter((d): d is string => Boolean(d));
-    if (polledDates.length > 0) {
-      polledDates.sort().reverse();
-      lastCollectionRun = polledDates[0];
-    }
+  const polledDates = sources
+    .map((s) => s.lastPolledAt)
+    .filter((d): d is string => Boolean(d));
+  if (polledDates.length > 0) {
+    polledDates.sort().reverse();
+    lastCollectionRun = polledDates[0];
   }
 
-  // 5. Current profile version
+  // 4. Current profile version
   const profile = await repository.getLatestProfile(readerId);
   const currentProfileVersion = profile?.version ?? 1;
 
-  // 6. Interaction event counts
-  const rawEvents = db
-    .select({ eventType: interactionEventsTable.eventType })
-    .from(interactionEventsTable)
-    .all();
-  const totalEvents = rawEvents.length;
+  // 5. Interaction event counts
+  const events = await repository.getEvents(1000);
+  const totalEvents = events.length;
   const byType: Record<string, number> = {};
-  for (const ev of rawEvents) {
-    byType[ev.eventType] = (byType[ev.eventType] || 0) + 1;
+  for (const ev of events) {
+    if (ev.eventType) {
+      byType[ev.eventType] = (byType[ev.eventType] || 0) + 1;
+    }
   }
 
   const eventCounts: EventCounts = {

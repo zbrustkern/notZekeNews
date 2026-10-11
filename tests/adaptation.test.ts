@@ -9,15 +9,6 @@ import {
 } from "@/lib/ranking/adaptation";
 import { repository } from "@/lib/storage/sqlite-repository";
 import { getSystemHealth } from "@/lib/ops/health";
-import { db } from "@/lib/storage/db";
-import {
-  interactionEventsTable,
-  interestProfilesTable,
-  preferencesTable,
-  storiesTable,
-  articlesTable,
-} from "@/lib/storage/schema";
-import { eq } from "drizzle-orm";
 import { Story, Article, InteractionEvent, Preference } from "@/lib/domain/types";
 
 const TEST_READER = "test_reader_m2";
@@ -51,11 +42,9 @@ describe("Milestone 2: Adaptive Profile Learning Engine & Telemetry Aggregator",
 
   beforeEach(async () => {
     // Clean up test data before each test
-    db.delete(interactionEventsTable).where(eq(interactionEventsTable.readerId, TEST_READER)).run();
-    db.delete(interestProfilesTable).run();
-    db.delete(preferencesTable).where(eq(preferencesTable.readerId, TEST_READER)).run();
-    db.delete(storiesTable).where(eq(storiesTable.id, TEST_STORY_ID)).run();
-    db.delete(articlesTable).where(eq(articlesTable.id, TEST_ARTICLE_ID)).run();
+    if ("clear" in (repository as any)) {
+      (repository as any).clear();
+    }
 
     // Seed test story & article
     await repository.saveArticle(sampleArticle);
@@ -64,11 +53,9 @@ describe("Milestone 2: Adaptive Profile Learning Engine & Telemetry Aggregator",
 
   afterEach(async () => {
     // Clean up test artifacts
-    db.delete(interactionEventsTable).where(eq(interactionEventsTable.readerId, TEST_READER)).run();
-    db.delete(interestProfilesTable).run();
-    db.delete(preferencesTable).where(eq(preferencesTable.readerId, TEST_READER)).run();
-    db.delete(storiesTable).where(eq(storiesTable.id, TEST_STORY_ID)).run();
-    db.delete(articlesTable).where(eq(articlesTable.id, TEST_ARTICLE_ID)).run();
+    if ("clear" in (repository as any)) {
+      (repository as any).clear();
+    }
   });
 
   describe("1. Decay Mechanics Kinetics", () => {
